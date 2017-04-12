@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<style>
+ html, body, #map-canvas {
+        height:400px,
+		width:100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #panel {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        margin-left: 0px;
+        z-index: 4;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+      }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+ <!-- <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC35skzDywGa_gUMM8zTkMttPB0J0oy2BA&callback=initMap">
+    </script>
+ --><script src="https://maps.googleapis.com/maps/api/js?libraries=visualization"> </script> 
+<script>   
+
+var maper;
+function initMap() {
+  var myLatNLng = {lat: 37.542571, lng :-121.993037};
+    maper = new google.maps.Map(document.getElementById('mapCanvas'), {
+    center: myLatNLng,
+    scrollwheel: false,
+    zoom: 9
+  });
+  var s = document.createElement('script');
+  s.type = 'text/javascript';
+  s.src= "location_chart.js";
+  document.getElementsByTagName('head')[0].appendChild(s);
+}
+
+  window.eqfeed_callback = function(results) {
+        for (var i = 0; i < results.locations.location.length; i++) {
+          var lat = results.locations.location[i].latitude;
+          var lng = results.locations.location[i].longitude;
+          var latLng = new google.maps.LatLng(lat,lng);
+          var icon = "";
+          switch(results.locations.location[i].type){
+            case "Distribution Facility":
+              icon = "red";
+              break;
+              case "HeadQuarters":
+              icon = "white";
+              break;
+          	case "RetailLocation":
+          		icon = "green";
+          		break;
+          	
+          	case "Call Center":
+          		icon = "blue";
+          		break;
+          	
+          }
+          icon = "http://maps.google.com/mapfiles/ms/icons/" + icon + ".png";
+
+          if (results.locations.location[i].type === "RetailLocation"){
+          	var circle = new google.maps.Circle({
+          		strokeColor: '#0080FF',
+          		fillColor:  '#0080FF',
+              fillOpacity: 0.35,
+              strokeOpacity: 0.6,
+          		strokeWeight: 1.4,
+          		map: maper,
+          		center: latLng,
+          		radius: Math.sqrt(results.locations.location[i]["$revenue"])*1.8
+          	});
+          }
+          var marker = new google.maps.Marker({
+            position: latLng,
+            map: maper,
+            animation: google.maps.Animation.DROP,
+            icon: new google.maps.MarkerImage(icon)
+          });
+        }
+      }
+  
+  google.maps.event.addDomListener(window, 'load', initMap);
+  </script>
+ 
+</head>
+<body><center>
+<h1> MyCo Locations</h1>
+</br>
+    <div id="mapCanvas" style="width:80%;height:600px"></div>
+</body>
+</html>
